@@ -6,4 +6,21 @@
         <ImplicitUsings>enable</ImplicitUsings>
     </PropertyGroup>
 
+    <ItemGroup>
+        <!-- Temel EF Core Paketi -->
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
+
+        <!-- Identity (Kullanıcı Yönetimi ve IdentityDbContext hatasını çözer) -->
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.10" />
+
+        <!-- PostgreSQL Bağlantısı (Veritabanı hatasını çözer) -->
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.10" />
+
+        <!-- Migration Araçları (Komut satırı araçları için) -->
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.10">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
 </Project>
