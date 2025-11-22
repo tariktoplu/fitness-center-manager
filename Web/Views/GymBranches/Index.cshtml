@@ -1,0 +1,44 @@
+@model IEnumerable<Web.Models.GymBranch>
+
+@{
+    ViewData["Title"] = "Şubeler";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2><i class="bi bi-building"></i> Spor Salonu Şubeleri</h2>
+        <a asp-action="Create" class="btn btn-success"><i class="bi bi-plus-lg"></i> Yeni Şube Ekle</a>
+    </div>
+
+    <table class="table table-hover table-bordered shadow-sm">
+        <thead class="table-dark">
+        <tr>
+            <th>Şube Adı</th>
+            <th>Şehir</th>
+            <th>Telefon</th>
+            <th>Durum</th>
+            <th>İşlemler</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model) {
+            <tr>
+                <td>@item.Name</td>
+                <td>@item.City</td>
+                <td>@item.PhoneNumber</td>
+                <td>
+                    @if(item.IsActive) {
+                        <span class="badge bg-success">Aktif</span>
+                    } else {
+                        <span class="badge bg-danger">Pasif</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">Düzenle</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Sil</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

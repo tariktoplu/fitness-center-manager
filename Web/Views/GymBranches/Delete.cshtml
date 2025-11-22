@@ -1,0 +1,35 @@
+@model Web.Models.GymBranch
+
+@{
+    ViewData["Title"] = "Şube Sil";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger shadow">
+                <div class="card-header bg-danger text-white">
+                    <h4>Şubeyi Silmek İstediğinize Emin misiniz?</h4>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">@Model.Name</h5>
+                    <p class="card-text">
+                        <strong>Şehir:</strong> @Model.City <br/>
+                        <strong>Adres:</strong> @Model.Address
+                    </p>
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> Bu işlem geri alınamaz.
+                    </div>
+                    
+                    <form asp-action="Delete">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger">Evet, Sil</button>
+                            <a asp-action="Index" class="btn btn-secondary">İptal</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
