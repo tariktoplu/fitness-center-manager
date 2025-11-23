@@ -1,0 +1,36 @@
+@model IEnumerable<Web.Models.Service>
+
+@{
+    ViewData["Title"] = "Hizmetler";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2><i class="bi bi-activity"></i> Hizmet Listesi</h2>
+        <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Yeni Hizmet Ekle</a>
+    </div>
+
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm border-start border-4 border-primary">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <h5 class="card-title">@item.Name</h5>
+                            <span class="badge bg-secondary">@item.Category.Name</span>
+                        </div>
+                        <p class="card-text text-muted mt-2">@item.Description</p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <h5 class="text-success mb-0">@item.BasePrice ₺</h5>
+                            <span class="text-muted"><i class="bi bi-clock"></i> @item.DurationMinutes dk</span>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white text-end">
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-outline-danger btn-sm">Sil</a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,64 @@
+@model Web.Models.ViewModels.BookAppointmentViewModel
+
+@{
+    ViewData["Title"] = "Randevu Al";
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4><i class="bi bi-calendar-plus"></i> Randevu Oluştur</h4>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <!-- Tarih -->
+                        <div class="mb-3">
+                            <label asp-for="AppointmentDate" class="form-label"></label>
+                            <input asp-for="AppointmentDate" class="form-control" type="date" />
+                            <span asp-validation-for="AppointmentDate" class="text-danger"></span>
+                        </div>
+
+                        <!-- Saat -->
+                        <div class="mb-3">
+                            <label asp-for="StartTime" class="form-label"></label>
+                            <input asp-for="StartTime" class="form-control" type="time" />
+                            <small class="text-muted">Ders süresi hizmete göre otomatik eklenir.</small>
+                            <span asp-validation-for="StartTime" class="text-danger"></span>
+                        </div>
+
+                        <!-- Eğitmen -->
+                        <div class="mb-3">
+                            <label asp-for="TrainerId" class="form-label"></label>
+                            <select asp-for="TrainerId" class="form-select" asp-items="ViewBag.TrainerId">
+                                <option value="">-- Eğitmen Seçiniz --</option>
+                            </select>
+                            <span asp-validation-for="TrainerId" class="text-danger"></span>
+                        </div>
+
+                        <!-- Hizmet -->
+                        <div class="mb-3">
+                            <label asp-for="ServiceId" class="form-label"></label>
+                            <select asp-for="ServiceId" class="form-select" asp-items="ViewBag.ServiceId">
+                                <option value="">-- Hizmet Seçiniz --</option>
+                            </select>
+                            <span asp-validation-for="ServiceId" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary">Randevuyu Onayla</button>
+                            <a asp-action="Index" class="btn btn-secondary">Vazgeç</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
