@@ -1,0 +1,18 @@
+@model Web.Models.Service
+
+@{
+    ViewData["Title"] = "Hizmet Sil";
+}
+
+<div class="container mt-5">
+    <div class="alert alert-danger text-center">
+        <h4>Bu hizmeti silmek istediğinize emin misiniz?</h4>
+        <p><strong>@Model.Name</strong> (@Model.Category.Name)</p>
+        
+        <form asp-action="Delete">
+            <input type="hidden" asp-for="Id" />
+            <button type="submit" class="btn btn-danger">Evet, Sil</button>
+            <a asp-action="Index" class="btn btn-secondary">İptal</a>
+        </form>
+    </div>
+</div>

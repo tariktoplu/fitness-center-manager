@@ -1,13 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-    </PropertyGroup>
+      <UserSecretsId>221e0e6a-cee0-484e-b259-b12a1734677f</UserSecretsId>
+  </PropertyGroup>
 
     <ItemGroup>
         <!-- Temel EF Core Paketi -->
+        <PackageReference Include="Google.GenAI" Version="0.6.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
 
         <!-- Identity (Kullanıcı Yönetimi ve IdentityDbContext hatasını çözer) -->
