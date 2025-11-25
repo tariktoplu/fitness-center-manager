@@ -1,0 +1,110 @@
+@model Web.Models.ViewModels.BranchServicesViewModel
+
+@{
+ViewData["Title"] = "Hizmetleri Yönet";
+}
+
+<div class="container mt-4">
+    <div class="card shadow border-0">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="mb-0"><i class="bi bi-shop"></i> @Model.BranchName</h4>
+                <small>Bu şubede verilen hizmetleri seçin ve fiyatlandırın</small>
+            </div>
+            <a asp-action="Index" class="btn btn-light btn-sm text-primary fw-bold">Listeye Dön</a>
+        </div>
+
+        <div class="card-body p-4">
+
+            <!-- EĞER SİSTEMDE HİÇ HİZMET YOKSA BU UYARIYI GÖSTER -->
+            @if (Model.Services.Count == 0)
+            {
+            <div class="alert alert-warning text-center">
+                <i class="bi bi-exclamation-circle fs-1 d-block mb-3"></i>
+                <h4>Sistemde tanımlı hiç hizmet bulunamadı!</h4>
+                <p>Şubeye hizmet atayabilmek için önce genel hizmet tanımlarını yapmalısınız.</p>
+                <a asp-controller="Services" asp-action="Create" class="btn btn-warning fw-bold mt-2">
+                    <i class="bi bi-plus-circle"></i> Yeni Hizmet Tanımla
+                </a>
+            </div>
+            }
+            else
+            {
+            <!-- HİZMET VARSA LİSTEYİ GÖSTER -->
+            <form asp-action="ManageServices" method="post">
+                <input type="hidden" asp-for="GymBranchId" />
+                <input type="hidden" asp-for="BranchName" />
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th class="text-center" style="width: 80px;">Seç</th>
+                            <th>Hizmet Adı</th>
+                            <th style="width: 250px;">Bu Şubedeki Fiyatı (₺)</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @for (int i = 0; i < Model.Services.Count; i++)
+                        {
+                        <tr class="@(Model.Services[i].IsSelected ? "" : "bg-light text-muted")">
+                            <td class="text-center">
+                                <input type="hidden" asp-for="Services[i].ServiceId" />
+                                <input type="hidden" asp-for="Services[i].ServiceName" />
+
+                                <div class="form-check d-inline-block">
+                                    <input class="form-check-input border-primary"
+                                           type="checkbox"
+                                           asp-for="Services[i].IsSelected"
+                                           style="transform: scale(1.3); cursor: pointer;"
+                                           onchange="toggleRow(this)">
+                                </div>
+                            </td>
+                            <td>
+                                <span class="fw-bold fs-5">@Model.Services[i].ServiceName</span>
+                            </td>
+                            <td>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white">₺</span>
+                                    <input asp-for="Services[i].Price"
+                                           type="number"
+                                           class="form-control price-input"
+                                           disabled="@(!Model.Services[i].IsSelected)" />
+                                </div>
+                            </td>
+                        </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <a asp-controller="Services" asp-action="Create" class="btn btn-outline-primary">
+                        <i class="bi bi-plus-lg"></i> Listede Olmayan Yeni Bir Hizmet Ekle
+                    </a>
+                    <button type="submit" class="btn btn-success btn-lg px-5 shadow">
+                        <i class="bi bi-save"></i> Kaydet ve Güncelle
+                    </button>
+                </div>
+            </form>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function toggleRow(checkbox) {
+        var row = checkbox.closest('tr');
+        var input = row.querySelector('.price-input');
+
+        if (checkbox.checked) {
+            row.classList.remove('bg-light', 'text-muted');
+            input.disabled = false;
+        } else {
+            row.classList.add('bg-light', 'text-muted');
+            input.disabled = true;
+        }
+    }
+</script>
+}

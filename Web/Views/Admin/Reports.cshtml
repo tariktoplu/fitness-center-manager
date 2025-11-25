@@ -1,0 +1,82 @@
+@{
+    ViewData["Title"] = "Canlı Raporlar (API)";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4"><i class="bi bi-bar-chart-line"></i> Canlı Sistem Raporları</h2>
+    <p class="text-muted">Bu veriler REST API (<code>/api/reports</code>) üzerinden anlık çekilmektedir.</p>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <button onclick="loadTrainers()" class="btn btn-primary w-100">
+                <i class="bi bi-person-badge"></i> Eğitmen Listesini Getir (API)
+            </button>
+        </div>
+        <div class="col-md-6">
+            <button onclick="loadAppointments()" class="btn btn-success w-100">
+                <i class="bi bi-calendar3"></i> Bugünün Randevularını Getir (API)
+            </button>
+        </div>
+    </div>
+
+    <!-- Sonuçların Basılacağı Alan -->
+    <div id="reportArea" class="card shadow-sm d-none">
+        <div class="card-header bg-dark text-white" id="reportTitle">Sonuçlar</div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="apiTable">
+                    <!-- JS ile doldurulacak -->
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // 1. Eğitmenleri Getir
+        async function loadTrainers() {
+            try {
+                const response = await fetch('/api/reports/trainers');
+                const data = await response.json();
+                
+                let html = '<thead class="table-light"><tr><th>Ad Soyad</th><th>Şube</th><th>Puan</th></tr></thead><tbody>';
+                data.forEach(t => {
+                    html += `<tr><td>${t.adSoyad}</td><td>${t.sube}</td><td>⭐ ${t.puan}</td></tr>`;
+                });
+                html += '</tbody>';
+                
+                showTable("Eğitmen Listesi", html);
+            } catch (err) { alert("API Hatası!"); }
+        }
+
+        // 2. Randevuları Getir
+        async function loadAppointments() {
+            try {
+                // Bugünün tarihini YYYY-MM-DD formatında al
+                const today = new Date().toISOString().split('T')[0];
+                const response = await fetch(`/api/reports/appointments?date=${today}`);
+                const data = await response.json();
+
+                let html = '<thead class="table-light"><tr><th>Saat</th><th>Eğitmen</th><th>Hizmet</th><th>Durum</th></tr></thead><tbody>';
+                
+                if(data.length === 0) {
+                    html = '<tr><td colspan="4" class="text-center">Bugün için kayıtlı randevu bulunamadı.</td></tr>';
+                } else {
+                    data.forEach(a => {
+                        html += `<tr><td>${a.baslangic}</td><td>${a.egitmen}</td><td>${a.hizmet}</td><td>${a.durum}</td></tr>`;
+                    });
+                }
+                html += '</tbody>';
+
+                showTable(`Randevular (${today})`, html);
+            } catch (err) { alert("API Hatası!"); }
+        }
+
+        function showTable(title, content) {
+            document.getElementById("reportArea").classList.remove("d-none");
+            document.getElementById("reportTitle").innerText = title;
+            document.getElementById("apiTable").innerHTML = content;
+        }
+    </script>
+}

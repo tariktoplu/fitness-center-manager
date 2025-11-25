@@ -1,0 +1,59 @@
+@model Web.Models.ViewModels.TrainerAvailabilityViewModel
+
+@{
+    ViewData["Title"] = "Çalışma Saatleri";
+}
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header bg-warning text-dark">
+            <h4 class="mb-0"><i class="bi bi-calendar-week"></i> @Model.TrainerName - Çalışma Saatleri</h4>
+        </div>
+        <div class="card-body">
+            <form asp-action="ManageAvailability" method="post">
+                <input type="hidden" asp-for="TrainerId" />
+                <input type="hidden" asp-for="TrainerName" />
+
+                <table class="table table-bordered align-middle">
+                    <thead class="table-light text-center">
+                        <tr>
+                            <th>Gün</th>
+                            <th>Durum</th>
+                            <th>Mesai Başlangıç</th>
+                            <th>Mesai Bitiş</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @for (int i = 0; i < Model.WeeklySchedule.Count; i++)
+                        {
+                            <tr>
+                                <td class="fw-bold bg-light text-center">
+                                    <input type="hidden" asp-for="WeeklySchedule[i].DayOfWeek" />
+                                    <input type="hidden" asp-for="WeeklySchedule[i].DayName" />
+                                    @Model.WeeklySchedule[i].DayName
+                                </td>
+                                <td class="text-center">
+                                    <div class="form-check form-switch d-flex justify-content-center">
+                                        <input class="form-check-input" type="checkbox" asp-for="WeeklySchedule[i].IsAvailable" checked="@Model.WeeklySchedule[i].IsAvailable">
+                                        <label class="form-check-label ms-2">Çalışıyor</label>
+                                    </div>
+                                </td>
+                                <td>
+                                    <input type="time" asp-for="WeeklySchedule[i].StartTime" class="form-control" />
+                                </td>
+                                <td>
+                                    <input type="time" asp-for="WeeklySchedule[i].EndTime" class="form-control" />
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                    <a asp-action="Index" class="btn btn-secondary me-2">İptal</a>
+                    <button type="submit" class="btn btn-warning px-5"><i class="bi bi-save"></i> Programı Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

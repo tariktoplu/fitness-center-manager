@@ -1,0 +1,69 @@
+@model IEnumerable<Web.Models.Appointment>
+
+@{
+    ViewData["Title"] = "Onay Bekleyen Randevular";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-warning"><i class="bi bi-hourglass-split"></i> Onay Bekleyen Randevular</h2>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-success d-flex align-items-center">
+            <i class="bi bi-check-circle-fill me-2 fs-4"></i>
+            <div>Şu an bekleyen randevu talebi bulunmamaktadır.</div>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped mb-0 align-middle">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Tarih</th>
+                                <th>Saat</th>
+                                <th>Üye Adı</th>
+                                <th>Eğitmen</th>
+                                <th>Hizmet</th>
+                                <th class="text-end pe-4">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.AppointmentDate.ToString("dd.MM.yyyy")</td>
+                                    <td>@item.StartTime - @item.EndTime</td>
+                                    <td class="fw-bold">@item.Member.User.FirstName @item.Member.User.LastName</td>
+                                    <td>@item.Trainer.User.FirstName @item.Trainer.User.LastName</td>
+                                    <td><span class="badge bg-info text-dark">@item.GymService.Service.Name</span></td>
+                                    <td class="text-end pe-3">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <!-- Onayla Butonu -->
+                                            <form asp-action="Approve" method="post">
+                                                <input type="hidden" name="id" value="@item.Id" />
+                                                <button type="submit" class="btn btn-success btn-sm" title="Onayla">
+                                                    <i class="bi bi-check-lg"></i> Onayla
+                                                </button>
+                                            </form>
+                                            
+                                            <!-- Reddet Butonu -->
+                                            <form asp-action="Cancel" method="post">
+                                                <input type="hidden" name="id" value="@item.Id" />
+                                                <button type="submit" class="btn btn-danger btn-sm" title="Reddet">
+                                                    <i class="bi bi-x-lg"></i> Reddet
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>

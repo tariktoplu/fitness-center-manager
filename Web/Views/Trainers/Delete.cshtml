@@ -1,0 +1,39 @@
+@model Web.Models.Trainer
+
+@{
+    ViewData["Title"] = "Eğitmen Sil";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-danger shadow">
+                <div class="card-header bg-danger text-white">
+                    <h4>Eğitmeni Silmek İstiyor musunuz?</h4>
+                </div>
+                <div class="card-body text-center">
+                    @if (!string.IsNullOrEmpty(Model.ProfileImageUrl))
+                    {
+                        <img src="~/images/trainers/@Model.ProfileImageUrl" class="rounded-circle mb-3" width="100" height="100" style="object-fit:cover" />
+                    }
+                    
+                    <h4 class="card-title">@Model.User.FirstName @Model.User.LastName</h4>
+                    <p class="text-muted">@Model.GymBranch.Name</p>
+                    
+                    <div class="alert alert-warning text-start">
+                        <i class="bi bi-exclamation-triangle-fill"></i> 
+                        <strong>Dikkat:</strong> Bu işlem eğitmeni ve sisteme giriş yaptığı kullanıcı hesabını kalıcı olarak silecektir.
+                    </div>
+                    
+                    <form asp-action="Delete">
+                        <input type="hidden" asp-for="Id" />
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger">Evet, Sil</button>
+                            <a asp-action="Index" class="btn btn-secondary">İptal</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
