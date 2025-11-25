@@ -1,8 +1,123 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Ana Sayfa";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- HERO SECTION: Karşılama Alanı -->
+<div class="hero-section text-center text-white d-flex align-items-center justify-content-center">
+    <div class="container animate__animated animate__fadeInUp">
+        <h1 class="display-3 fw-bold mb-3">Sınırlarını Zorla, <br/> En İyi Versiyonunu Yarat!</h1>
+        <p class="lead mb-4 fs-4 text-white-50">Profesyonel ekipmanlar, uzman antrenörler ve <br/> Yapay Zeka destekli kişisel analizler.</p>
+        
+        @if (!User.Identity!.IsAuthenticated)
+        {
+            <div class="d-flex justify-content-center gap-3">
+                <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg rounded-pill px-5 shadow">
+                    Hemen Üye Ol <i class="bi bi-arrow-right ms-2"></i>
+                </a>
+                <a asp-controller="Account" asp-action="Login" class="btn btn-outline-light btn-lg rounded-pill px-5">
+                    Giriş Yap
+                </a>
+            </div>
+        }
+        else
+        {
+            <a asp-controller="Appointments" asp-action="Create" class="btn btn-success btn-lg rounded-pill px-5 shadow">
+                Randevu Al <i class="bi bi-calendar-check ms-2"></i>
+            </a>
+        }
+    </div>
+</div>
+
+<div class="container mt-5">
+    
+    <!-- NEDEN BİZ? (Kartlar) -->
+    <div class="row text-center g-4 mb-5">
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm hover-up p-4">
+                <div class="card-body">
+                    <div class="icon-box bg-light text-primary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="bi bi-lightning-charge-fill fs-1"></i>
+                    </div>
+                    <h4 class="card-title fw-bold">Modern Ekipmanlar</h4>
+                    <p class="card-text text-muted">Son teknoloji ağırlık ve kardiyo ekipmanları ile antrenman deneyimini zirveye taşı.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm hover-up p-4">
+                <div class="card-body">
+                    <div class="icon-box bg-light text-success rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="bi bi-people-fill fs-1"></i>
+                    </div>
+                    <h4 class="card-title fw-bold">Uzman Eğitmenler</h4>
+                    <p class="card-text text-muted">Alanında uzman, sertifikalı antrenörlerimizle hedeflerine ulaşmak için birebir çalış.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 border-0 shadow-sm hover-up p-4 border-top border-5 border-primary">
+                <div class="card-body">
+                    <div class="icon-box bg-primary text-white rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                        <i class="bi bi-robot fs-1"></i>
+                    </div>
+                    <h4 class="card-title fw-bold text-primary">AI Asistan</h4>
+                    <p class="card-text text-muted">Google AI destekli sistemimizle vücut tipine uygun beslenme ve egzersiz planını anında al.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI TANITIM BÖLÜMÜ -->
+    <div class="row align-items-center bg-dark text-white rounded-4 p-5 shadow mb-5 overflow-hidden position-relative">
+        <div class="col-lg-7 z-1">
+            <span class="badge bg-warning text-dark mb-2">YENİ ÖZELLİK</span>
+            <h2 class="display-5 fw-bold mb-3">Yapay Zeka ile Tanışın 🤖</h2>
+            <p class="lead text-white-50">
+                Hangi egzersizi yapacağını bilmiyor musun? Veya nasıl beslenmen gerektiği konusunda kararsız mısın? 
+                AI Asistanımıza boyunu, kilonu ve hedefini söyle, saniyeler içinde sana özel plan hazırlasın.
+            </p>
+            <a asp-controller="AI" asp-action="Index" class="btn btn-primary btn-lg rounded-pill mt-3 px-4">
+                <i class="bi bi-magic me-2"></i> Şimdi Analiz Et
+            </a>
+        </div>
+        <div class="col-lg-5 text-center d-none d-lg-block z-1">
+            <i class="bi bi-cpu text-white-50" style="font-size: 12rem;"></i>
+        </div>
+        <!-- Arka Plan Efekti -->
+        <div class="position-absolute top-0 end-0 bg-primary opacity-25 rounded-circle" style="width: 300px; height: 300px; filter: blur(80px); transform: translate(30%, -30%);"></div>
+    </div>
+
+    <!-- HİZMETLER -->
+    <div class="text-center mb-5">
+        <h2 class="fw-bold">Neler Sunuyoruz?</h2>
+        <p class="text-muted">Her seviyeye uygun programlarımızla yanınızdayız.</p>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-6 col-md-3">
+            <div class="p-4 border rounded-3 text-center bg-light hover-up">
+                <i class="bi bi-heart-pulse text-danger fs-1 mb-2"></i>
+                <h5 class="fw-bold">Kardiyo</h5>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="p-4 border rounded-3 text-center bg-light hover-up">
+                <i class="bi bi-gem text-info fs-1 mb-2"></i>
+                <h5 class="fw-bold">Yoga</h5>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="p-4 border rounded-3 text-center bg-light hover-up">
+                <i class="bi bi-capsule text-warning fs-1 mb-2"></i>
+                <h5 class="fw-bold">Pilates</h5>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="p-4 border rounded-3 text-center bg-light hover-up">
+                <i class="bi bi-trophy text-success fs-1 mb-2"></i>
+                <h5 class="fw-bold">CrossFit</h5>
+            </div>
+        </div>
+    </div>
+
 </div>

@@ -2,38 +2,50 @@
 
 @{
     ViewData["Title"] = "Randevu Al";
+    // Flatpickr CSS (Sadece bu sayfada lazım)
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_blue.css">
 }
 
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <div class="card shadow">
+            <div class="card shadow border-0">
                 <div class="card-header bg-primary text-white">
-                    <h4><i class="bi bi-calendar-plus"></i> Randevu Oluştur</h4>
+                    <h4 class="mb-0"><i class="bi bi-calendar-plus"></i> Randevu Oluştur</h4>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4">
                     <form asp-action="Create">
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
                         <!-- Tarih -->
                         <div class="mb-3">
-                            <label asp-for="AppointmentDate" class="form-label"></label>
-                            <input asp-for="AppointmentDate" class="form-control" type="date" />
+                            <label asp-for="AppointmentDate" class="form-label fw-bold"></label>
+                            <input asp-for="AppointmentDate" class="form-control form-control-lg" type="date" />
                             <span asp-validation-for="AppointmentDate" class="text-danger"></span>
                         </div>
 
-                        <!-- Saat -->
+                        <!-- Saat (Flatpickr ile 24 Saat Zorlama) -->
                         <div class="mb-3">
-                            <label asp-for="StartTime" class="form-label"></label>
-                            <input asp-for="StartTime" class="form-control" type="time" />
-                            <small class="text-muted">Ders süresi hizmete göre otomatik eklenir.</small>
+                            <label class="form-label fw-bold">Başlangıç Saati</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-clock"></i></span>
+                                <!-- type="text" yapıyoruz ki tarayıcının kendi AM/PM seçicisi çıkmasın -->
+                                <input asp-for="StartTime" 
+                                       type="text" 
+                                       id="timePicker" 
+                                       class="form-control form-control-lg bg-white" 
+                                       placeholder="Saat Seçiniz (Örn: 14:00)" 
+                                       readonly />
+                            </div>
+                            <small class="text-muted">Hizmet süresi bu saate otomatik eklenecektir.</small>
                             <span asp-validation-for="StartTime" class="text-danger"></span>
                         </div>
 
                         <!-- Eğitmen -->
                         <div class="mb-3">
-                            <label asp-for="TrainerId" class="form-label"></label>
-                            <select asp-for="TrainerId" class="form-select" asp-items="ViewBag.TrainerId">
+                            <label asp-for="TrainerId" class="form-label fw-bold"></label>
+                            <select asp-for="TrainerId" class="form-select form-select-lg" asp-items="ViewBag.TrainerId">
                                 <option value="">-- Eğitmen Seçiniz --</option>
                             </select>
                             <span asp-validation-for="TrainerId" class="text-danger"></span>
@@ -41,16 +53,20 @@
 
                         <!-- Hizmet -->
                         <div class="mb-3">
-                            <label asp-for="ServiceId" class="form-label"></label>
-                            <select asp-for="ServiceId" class="form-select" asp-items="ViewBag.ServiceId">
+                            <label asp-for="ServiceId" class="form-label fw-bold"></label>
+                            <select asp-for="ServiceId" class="form-select form-select-lg" asp-items="ViewBag.ServiceId">
                                 <option value="">-- Hizmet Seçiniz --</option>
                             </select>
                             <span asp-validation-for="ServiceId" class="text-danger"></span>
+                            
+                            <div class="mt-2">
+                                <small id="durationInfo" class="text-info fw-bold"></small>
+                            </div>
                         </div>
 
                         <div class="d-grid gap-2 mt-4">
-                            <button type="submit" class="btn btn-primary">Randevuyu Onayla</button>
-                            <a asp-action="Index" class="btn btn-secondary">Vazgeç</a>
+                            <button type="submit" class="btn btn-primary btn-lg shadow">Randevuyu Onayla</button>
+                            <a asp-action="Index" class="btn btn-secondary btn-lg">Vazgeç</a>
                         </div>
                     </form>
                 </div>
@@ -61,4 +77,35 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- Türkçe Dil Paketi -->
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/tr.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // 1. Hizmet Bilgisi Gösterme
+            $("#ServiceId").change(function() {
+                var text = $("#ServiceId option:selected").text();
+                if(text && text !== "-- Hizmet Seçiniz --") {
+                    $("#durationInfo").html('<i class="bi bi-info-circle"></i> Seçilen hizmetin süresi, bitiş saatinize otomatik olarak eklenecektir.');
+                } else {
+                    $("#durationInfo").text("");
+                }
+            });
+
+            // 2. Flatpickr Kurulumu (Modern Saat Seçici)
+            flatpickr("#timePicker", {
+                enableTime: true,           // Sadece saat seçimi
+                noCalendar: true,           // Takvimi gizle
+                dateFormat: "H:i",          // Format: 24 Saat (Örn: 14:30)
+                time_24hr: true,            // 24 Saat modunu zorla (AM/PM yok)
+                defaultDate: "09:00",       // Başlangıç değeri
+                minuteIncrement: 15,        // 15 dakikalık aralıklar (İstersen 1 yap)
+                locale: "tr",               // Türkçe
+                allowInput: true            // Elle yazmaya da izin ver
+            });
+        });
+    </script>
 }

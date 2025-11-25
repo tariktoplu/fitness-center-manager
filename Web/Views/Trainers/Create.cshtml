@@ -44,6 +44,37 @@
                         </div>
 
                         <h5 class="text-secondary border-bottom pb-2 mb-3 mt-3">Profil Detayları</h5>
+                            
+                        <!-- UZMANLIK ALANLARI SEÇİMİ -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Uzmanlık Alanları</label>
+                            <div class="card p-3 bg-light">
+                                <div class="row">
+                                    @{
+                                        var specializations = ViewBag.Specializations as List<Web.Models.Specialization>;
+                                        if (specializations != null)
+                                        {
+                                            foreach (var spec in specializations)
+                                            {
+                                                <div class="col-md-6">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" 
+                                                               name="SelectedSpecializationIds" 
+                                                               value="@spec.Id" 
+                                                               id="spec_@spec.Id"
+                                                               @(Model.SelectedSpecializationIds.Contains(spec.Id) ? "checked" : "")>
+                                                        <label class="form-check-label" for="spec_@spec.Id">
+                                                            @spec.Name
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            }
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
 
                         <div class="mb-3">
                             <label asp-for="GymBranchId" class="form-label">Çalışacağı Şube</label>

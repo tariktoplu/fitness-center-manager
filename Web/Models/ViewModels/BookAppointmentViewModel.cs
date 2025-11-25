@@ -18,7 +18,7 @@ public class BookAppointmentViewModel
     public DateOnly AppointmentDate { get; set; } = DateOnly.FromDateTime(DateTime.Now.AddDays(1));
 
     [Required(ErrorMessage = "Saat seçiniz.")]
-    [DataType(DataType.Time)]
     [Display(Name = "Başlangıç Saati")]
-    public TimeOnly StartTime { get; set; } = new TimeOnly(09, 00);
+    // DataType.Time attribute'ünü KALDIRIYORUZ, bazen formatı bozabiliyor.
+    public TimeOnly StartTime { get; set; } = new TimeOnly(09, 00); // Varsayılan 09:00
 }

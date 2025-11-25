@@ -34,4 +34,7 @@ public class TrainerViewModel
 
     [Display(Name = "Profil Fotoğrafı")]
     public IFormFile? ProfileImage { get; set; } // Dosya yükleme için
+    
+    [Display(Name = "Uzmanlık Alanları")]
+    public List<int> SelectedSpecializationIds { get; set; } = new();
 }
