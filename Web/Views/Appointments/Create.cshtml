@@ -1,10 +1,7 @@
 @model Web.Models.ViewModels.BookAppointmentViewModel
 
 @{
-    ViewData["Title"] = "Randevu Al";
-    // Flatpickr CSS (Sadece bu sayfada lazım)
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_blue.css">
+ViewData["Title"] = "Randevu Al";
 }
 
 <div class="container mt-4">
@@ -18,50 +15,41 @@
                     <form asp-action="Create">
                         <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
-                        <!-- Tarih -->
-                        <div class="mb-3">
-                            <label asp-for="AppointmentDate" class="form-label fw-bold"></label>
-                            <input asp-for="AppointmentDate" class="form-control form-control-lg" type="date" />
-                            <span asp-validation-for="AppointmentDate" class="text-danger"></span>
-                        </div>
-
-                        <!-- Saat (Flatpickr ile 24 Saat Zorlama) -->
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Başlangıç Saati</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-white"><i class="bi bi-clock"></i></span>
-                                <!-- type="text" yapıyoruz ki tarayıcının kendi AM/PM seçicisi çıkmasın -->
-                                <input asp-for="StartTime" 
-                                       type="text" 
-                                       id="timePicker" 
-                                       class="form-control form-control-lg bg-white" 
-                                       placeholder="Saat Seçiniz (Örn: 14:00)" 
-                                       readonly />
-                            </div>
-                            <small class="text-muted">Hizmet süresi bu saate otomatik eklenecektir.</small>
-                            <span asp-validation-for="StartTime" class="text-danger"></span>
-                        </div>
-
-                        <!-- Eğitmen -->
+                        <!-- 1. Eğitmen Seçimi -->
                         <div class="mb-3">
                             <label asp-for="TrainerId" class="form-label fw-bold"></label>
-                            <select asp-for="TrainerId" class="form-select form-select-lg" asp-items="ViewBag.TrainerId">
-                                <option value="">-- Eğitmen Seçiniz --</option>
+                            <select asp-for="TrainerId" class="form-select form-select-lg" asp-items="ViewBag.TrainerId" id="TrainerId">
+                                <option value="">-- Önce Eğitmen Seçiniz --</option>
                             </select>
                             <span asp-validation-for="TrainerId" class="text-danger"></span>
                         </div>
 
-                        <!-- Hizmet -->
+                        <!-- 2. Tarih Seçimi -->
+                        <div class="mb-3">
+                            <label asp-for="AppointmentDate" class="form-label fw-bold"></label>
+                            <input asp-for="AppointmentDate" class="form-control form-control-lg" type="date" id="AppointmentDate" />
+                            <span asp-validation-for="AppointmentDate" class="text-danger"></span>
+                        </div>
+
+                        <!-- 3. Dinamik Saat Seçimi (Burası Değişti) -->
+                        <div class="mb-3">
+                            <label asp-for="StartTime" class="form-label fw-bold">Müsait Saatler</label>
+                            <select asp-for="StartTime" class="form-select form-select-lg" id="TimeSelect" disabled>
+                                <option value="">-- Önce Tarih ve Eğitmen Seçin --</option>
+                            </select>
+                            <small class="text-muted" id="loadingTime" style="display:none;">
+                                <span class="spinner-border spinner-border-sm"></span> Saatler yükleniyor...
+                            </small>
+                            <span asp-validation-for="StartTime" class="text-danger"></span>
+                        </div>
+
+                        <!-- 4. Hizmet Seçimi -->
                         <div class="mb-3">
                             <label asp-for="ServiceId" class="form-label fw-bold"></label>
                             <select asp-for="ServiceId" class="form-select form-select-lg" asp-items="ViewBag.ServiceId">
                                 <option value="">-- Hizmet Seçiniz --</option>
                             </select>
                             <span asp-validation-for="ServiceId" class="text-danger"></span>
-                            
-                            <div class="mt-2">
-                                <small id="durationInfo" class="text-info fw-bold"></small>
-                            </div>
                         </div>
 
                         <div class="d-grid gap-2 mt-4">
@@ -76,36 +64,55 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 
-    <!-- Flatpickr JS -->
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <!-- Türkçe Dil Paketi -->
-    <script src="https://npmcdn.com/flatpickr/dist/l10n/tr.js"></script>
-
-    <script>
-        $(document).ready(function() {
-            // 1. Hizmet Bilgisi Gösterme
-            $("#ServiceId").change(function() {
-                var text = $("#ServiceId option:selected").text();
-                if(text && text !== "-- Hizmet Seçiniz --") {
-                    $("#durationInfo").html('<i class="bi bi-info-circle"></i> Seçilen hizmetin süresi, bitiş saatinize otomatik olarak eklenecektir.');
-                } else {
-                    $("#durationInfo").text("");
-                }
-            });
-
-            // 2. Flatpickr Kurulumu (Modern Saat Seçici)
-            flatpickr("#timePicker", {
-                enableTime: true,           // Sadece saat seçimi
-                noCalendar: true,           // Takvimi gizle
-                dateFormat: "H:i",          // Format: 24 Saat (Örn: 14:30)
-                time_24hr: true,            // 24 Saat modunu zorla (AM/PM yok)
-                defaultDate: "09:00",       // Başlangıç değeri
-                minuteIncrement: 15,        // 15 dakikalık aralıklar (İstersen 1 yap)
-                locale: "tr",               // Türkçe
-                allowInput: true            // Elle yazmaya da izin ver
-            });
+<script>
+    $(document).ready(function() {
+        // Eğitmen veya Tarih değiştiğinde çalışır
+        $('#TrainerId, #AppointmentDate').change(function() {
+            loadAvailableHours();
         });
-    </script>
+
+        function loadAvailableHours() {
+            var trainerId = $('#TrainerId').val();
+            var date = $('#AppointmentDate').val();
+            var timeSelect = $('#TimeSelect');
+            var loading = $('#loadingTime');
+
+            // Eğer ikisi de seçiliyse sorgu at
+            if (trainerId && date) {
+                timeSelect.prop('disabled', true);
+                loading.show();
+                timeSelect.empty().append('<option>Yükleniyor...</option>');
+
+                $.ajax({
+                    url: '@Url.Action("GetAvailableHours", "Appointments")',
+                    type: 'GET',
+                    data: { trainerId: trainerId, date: date },
+                    success: function(data) {
+                        timeSelect.empty();
+                        loading.hide();
+
+                        if (data.length === 0) {
+                            timeSelect.append('<option value="">Bu tarihte uygun saat yok</option>');
+                        } else {
+                            timeSelect.append('<option value="">-- Saat Seçiniz --</option>');
+                            $.each(data, function(i, time) {
+                                timeSelect.append($('<option></option>').val(time).html(time));
+                            });
+                            timeSelect.prop('disabled', false);
+                        }
+                    },
+                    error: function() {
+                        loading.hide();
+                        timeSelect.empty().append('<option>Hata oluştu</option>');
+                    }
+                });
+            } else {
+                timeSelect.prop('disabled', true);
+                timeSelect.empty().append('<option>-- Önce Tarih ve Eğitmen Seçin --</option>');
+            }
+        }
+    });
+</script>
 }

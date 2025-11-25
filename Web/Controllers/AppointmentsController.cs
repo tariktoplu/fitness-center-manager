@@ -224,4 +224,64 @@ public class AppointmentsController : Controller
         ViewData["TrainerId"] = new SelectList(trainers, "Id", "FullName", model.TrainerId);
         ViewData["ServiceId"] = new SelectList(_context.Services, "Id", "Name", model.ServiceId);
     }
+    
+    // --- AJAX İÇİN: MÜSAİT SAATLERİ GETİR ---
+        [HttpGet]
+        public async Task<JsonResult> GetAvailableHours(int trainerId, string date)
+        {
+            if (!DateOnly.TryParse(date, out DateOnly selectedDate))
+            {
+                return Json(new { error = "Geçersiz tarih." });
+            }
+    
+            // 1. Hocanın o günkü çalışma saatlerini bul
+            int dayOfWeek = (int)selectedDate.DayOfWeek;
+            var schedule = await _context.TrainerAvailabilities
+                .FirstOrDefaultAsync(t => t.TrainerId == trainerId && t.DayOfWeek == dayOfWeek);
+    
+            if (schedule == null || !schedule.IsAvailable)
+            {
+                return Json(new List<string>()); // O gün çalışmıyor, boş liste dön
+            }
+    
+            // 2. O günkü dolu randevuları çek
+            var existingAppointments = await _context.Appointments
+                .Where(a => a.TrainerId == trainerId && 
+                            a.AppointmentDate == selectedDate && 
+                            a.Status != "Cancelled")
+                .ToListAsync();
+    
+            // 3. Saat aralıklarını oluştur (Örn: 09:00, 10:00... diye saat başı)
+            var availableSlots = new List<string>();
+            
+            // Başlangıç ve Bitiş saatlerini al
+            TimeSpan current = schedule.StartTime.ToTimeSpan();
+            TimeSpan end = schedule.EndTime.ToTimeSpan();
+    
+            // Hizmet süresi varsayılan 60 dk kabul edelim (Listeleme için)
+            // İstenirse serviceId de parametre alınıp dinamik yapılabilir.
+            TimeSpan interval = TimeSpan.FromMinutes(60); 
+    
+            while (current.Add(interval) <= end)
+            {
+                // Bu saat aralığında çakışma var mı?
+                TimeOnly slotStart = TimeOnly.FromTimeSpan(current);
+                TimeOnly slotEnd = TimeOnly.FromTimeSpan(current.Add(interval));
+    
+                bool isTaken = existingAppointments.Any(a => 
+                    (slotStart >= a.StartTime && slotStart < a.EndTime) || // Başlangıç çakışması
+                    (slotEnd > a.StartTime && slotEnd <= a.EndTime) ||     // Bitiş çakışması
+                    (slotStart <= a.StartTime && slotEnd >= a.EndTime)     // Kapsama
+                );
+    
+                if (!isTaken)
+                {
+                    availableSlots.Add(slotStart.ToString("HH:mm"));
+                }
+    
+                current = current.Add(interval); // Bir sonraki saate geç
+            }
+    
+            return Json(availableSlots);
+        }
 }
