@@ -166,6 +166,7 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     
     <!-- Genel UI Efektleri -->
+    <!-- Genel UI Efektleri ve SweetAlert Tetikleyici -->
     <script>
         $(document).ready(function () {
             // Tablo satırlarına hover efekti
@@ -173,8 +174,29 @@
                 function() { $(this).addClass('table-active'); },
                 function() { $(this).removeClass('table-active'); }
             );
-            // Alertleri 4 saniye sonra otomatik kapat
-            setTimeout(function() { $(".alert").fadeOut("slow"); }, 4000);
+
+            // --- SWEETALERT ENTEGRASYONU ---
+            // Controller'dan gelen mesajları yakalar
+            var successMsg = '@TempData["Success"]';
+            var errorMsg = '@TempData["Error"]';
+
+            if (successMsg) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Başarılı!',
+                    text: successMsg,
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            }
+
+            if (errorMsg) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Hata!',
+                    text: errorMsg
+                });
+            }
         });
     </script>
     

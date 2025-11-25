@@ -5,50 +5,68 @@
 }
 
 <div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2><i class="bi bi-calendar-check"></i> Randevularım</h2>
-        <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Yeni Randevu Al</a>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-calendar-check text-primary"></i> Randevularım</h2>
+        <a asp-action="Create" class="btn btn-primary btn-lg shadow-sm">
+            <i class="bi bi-plus-lg"></i> Yeni Randevu Al
+        </a>
     </div>
 
     @if (!Model.Any())
     {
-        <div class="alert alert-info">Henüz hiç randevunuz yok. Hemen antrenmanlara başlayın!</div>
+        <div class="text-center mt-5 text-muted opacity-50">
+            <i class="bi bi-calendar-x" style="font-size: 5rem;"></i>
+            <h4 class="mt-3">Henüz hiç randevunuz yok.</h4>
+            <p>Hemen yeni bir randevu oluşturarak spora başlayın!</p>
+        </div>
     }
     else
     {
-        <table class="table table-hover shadow-sm">
-            <thead class="table-light">
-            <tr>
-                <th>Tarih</th>
-                <th>Saat</th>
-                <th>Hizmet</th>
-                <th>Eğitmen</th>
-                <th>Ücret</th>
-                <th>Durum</th>
-            </tr>
-            </thead>
-            <tbody>
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>@item.AppointmentDate.ToString("dd.MM.yyyy")</td>
-                    <td>@item.StartTime - @item.EndTime</td>
-                    <td>@item.GymService.Service.Name</td>
-                    <td>@item.Trainer.User.FirstName @item.Trainer.User.LastName</td>
-                    <td>@item.TotalPrice ₺</td>
-                    <td>
-                        @if (item.Status == "Confirmed")
+        <div class="card shadow-sm border-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Tarih</th>
+                            <th>Saat</th>
+                            <th>Hizmet</th>
+                            <th>Eğitmen</th>
+                            <th>Ücret</th>
+                            <th>Durum</th>
+                            <th class="text-end">İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
                         {
-                            <span class="badge bg-success">Onaylandı</span>
+                            <tr>
+                                <td class="fw-bold">@item.AppointmentDate.ToString("dd.MM.yyyy")</td>
+                                <td>@item.StartTime.ToString("HH:mm") - @item.EndTime.ToString("HH:mm")</td>
+                                <td><span class="badge bg-info text-dark">@item.GymService.Service.Name</span></td>
+                                <td>@item.Trainer.User.FirstName @item.Trainer.User.LastName</td>
+                                <td>@item.TotalPrice ₺</td>
+                                <td>
+                                    @if (item.Status == "Confirmed") { <span class="badge bg-success">Onaylandı</span> }
+                                    else if (item.Status == "Pending") { <span class="badge bg-warning text-dark">Onay Bekliyor</span> }
+                                    else { <span class="badge bg-secondary">İptal Edildi</span> }
+                                </td>
+                                <td class="text-end pe-3">
+                                    <!-- Sadece Gelecek ve İptal Edilmemiş Randevular İptal Edilebilir -->
+                                    @if (item.Status != "Cancelled" && item.AppointmentDate >= DateOnly.FromDateTime(DateTime.Now))
+                                    {
+                                        <form asp-action="Cancel" method="post" onsubmit="return confirm('Bu randevuyu iptal etmek istediğinize emin misiniz?');">
+                                            <input type="hidden" name="id" value="@item.Id" />
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                                <i class="bi bi-x-circle"></i> İptal Et
+                                            </button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
                         }
-                        else
-                        {
-                            <span class="badge bg-secondary">@item.Status</span>
-                        }
-                    </td>
-                </tr>
-            }
-            </tbody>
-        </table>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     }
 </div>

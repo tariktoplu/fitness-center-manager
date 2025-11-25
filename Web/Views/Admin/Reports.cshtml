@@ -1,82 +1,141 @@
 @{
-    ViewData["Title"] = "Canlı Raporlar (API)";
+ViewData["Title"] = "API Raporları";
 }
 
 <div class="container mt-4">
-    <h2 class="mb-4"><i class="bi bi-bar-chart-line"></i> Canlı Sistem Raporları</h2>
-    <p class="text-muted">Bu veriler REST API (<code>/api/reports</code>) üzerinden anlık çekilmektedir.</p>
+    <div class="text-center mb-5">
+        <h2 class="fw-bold text-primary"><i class="bi bi-cloud-download"></i> Canlı Sistem Raporları</h2>
+        <p class="text-muted">Bu veriler doğrudan REST API (<code>/api/reports</code>) üzerinden JavaScript ile çekilmektedir.</p>
+    </div>
 
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <button onclick="loadTrainers()" class="btn btn-primary w-100">
-                <i class="bi bi-person-badge"></i> Eğitmen Listesini Getir (API)
-            </button>
+    <div class="row g-4 justify-content-center">
+        <!-- Kart 1: Eğitmenler -->
+        <div class="col-md-5">
+            <div class="card h-100 shadow border-0 hover-up">
+                <div class="card-body text-center p-4">
+                    <div class="bg-light rounded-circle d-inline-flex p-3 mb-3">
+                        <i class="bi bi-person-badge text-primary fs-1"></i>
+                    </div>
+                    <h4>Eğitmen Listesi</h4>
+                    <p class="text-muted small">Tüm eğitmenleri ve şube bilgilerini JSON olarak çeker.</p>
+                    <button onclick="loadTrainers()" class="btn btn-primary w-100">
+                        <i class="bi bi-download"></i> Verileri Getir
+                    </button>
+                </div>
+            </div>
         </div>
-        <div class="col-md-6">
-            <button onclick="loadAppointments()" class="btn btn-success w-100">
-                <i class="bi bi-calendar3"></i> Bugünün Randevularını Getir (API)
-            </button>
+
+        <!-- Kart 2: Günlük Randevular -->
+        <div class="col-md-5">
+            <div class="card h-100 shadow border-0 hover-up">
+                <div class="card-body text-center p-4">
+                    <div class="bg-light rounded-circle d-inline-flex p-3 mb-3">
+                        <i class="bi bi-calendar-date text-success fs-1"></i>
+                    </div>
+                    <h4>Bugünün Randevuları</h4>
+                    <p class="text-muted small">Sadece bugüne ait randevuları API üzerinden filtreler.</p>
+                    <button onclick="loadAppointments()" class="btn btn-success w-100">
+                        <i class="bi bi-filter"></i> Bugünü Getir
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Sonuçların Basılacağı Alan -->
-    <div id="reportArea" class="card shadow-sm d-none">
-        <div class="card-header bg-dark text-white" id="reportTitle">Sonuçlar</div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-hover" id="apiTable">
-                    <!-- JS ile doldurulacak -->
-                </table>
+    <!-- SONUÇ ALANI -->
+    <div id="reportSection" class="mt-5 d-none animate__animated animate__fadeInUp">
+        <div class="card shadow border-0">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <span id="reportTitle" class="fw-bold">Rapor Sonucu</span>
+                <button onclick="closeReport()" class="btn btn-sm btn-outline-light"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover mb-0" id="apiTable">
+                        <!-- JS Dolduracak -->
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
-    <script>
-        // 1. Eğitmenleri Getir
-        async function loadTrainers() {
-            try {
-                const response = await fetch('/api/reports/trainers');
-                const data = await response.json();
-                
-                let html = '<thead class="table-light"><tr><th>Ad Soyad</th><th>Şube</th><th>Puan</th></tr></thead><tbody>';
-                data.forEach(t => {
-                    html += `<tr><td>${t.adSoyad}</td><td>${t.sube}</td><td>⭐ ${t.puan}</td></tr>`;
+<script>
+    // API'den Eğitmenleri Çek
+    async function loadTrainers() {
+        showLoading();
+        try {
+            const response = await fetch('/api/reports/trainers');
+            const data = await response.json();
+
+            let html = '<thead class="table-secondary"><tr><th>Ad Soyad</th><th>Şube</th><th>Uzmanlık</th><th>Ücret</th></tr></thead><tbody>';
+            data.forEach(t => {
+                html += `<tr>
+                                <td class="fw-bold">${t.adSoyad}</td>
+                                <td><span class="badge bg-info text-dark">${t.sube}</span></td>
+                                <td>${t.uzmanlik || '-'}</td>
+                                <td>${t.saatlikUcret} ₺</td>
+                             </tr>`;
+            });
+            html += '</tbody>';
+
+            displayTable("📋 Tüm Eğitmenler Listesi", html);
+        } catch (err) {
+            Swal.fire('Hata', 'Veriler çekilemedi.', 'error');
+        }
+    }
+
+    // API'den Randevuları Çek
+    async function loadAppointments() {
+        showLoading();
+        try {
+            const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+            const response = await fetch(`/api/reports/appointments?date=${today}`);
+            const data = await response.json();
+
+            let html = '<thead class="table-secondary"><tr><th>Saat</th><th>Eğitmen</th><th>Hizmet</th><th>Durum</th></tr></thead><tbody>';
+
+            if(data.length === 0) {
+                html = '<tr><td colspan="4" class="text-center py-3 text-muted">Bugün için kayıtlı randevu bulunamadı.</td></tr>';
+            } else {
+                data.forEach(a => {
+                    html += `<tr>
+                                    <td>${a.baslangic}</td>
+                                    <td>${a.egitmen}</td>
+                                    <td>${a.hizmet}</td>
+                                    <td>${a.durum}</td>
+                                 </tr>`;
                 });
-                html += '</tbody>';
-                
-                showTable("Eğitmen Listesi", html);
-            } catch (err) { alert("API Hatası!"); }
+            }
+            html += '</tbody>';
+
+            displayTable(`📅 Randevular (${today})`, html);
+        } catch (err) {
+            Swal.fire('Hata', 'Veriler çekilemedi.', 'error');
         }
+    }
 
-        // 2. Randevuları Getir
-        async function loadAppointments() {
-            try {
-                // Bugünün tarihini YYYY-MM-DD formatında al
-                const today = new Date().toISOString().split('T')[0];
-                const response = await fetch(`/api/reports/appointments?date=${today}`);
-                const data = await response.json();
+    // Yardımcı Fonksiyonlar
+    function showLoading() {
+        Swal.fire({
+            title: 'Yükleniyor...',
+            didOpen: () => { Swal.showLoading() }
+        });
+    }
 
-                let html = '<thead class="table-light"><tr><th>Saat</th><th>Eğitmen</th><th>Hizmet</th><th>Durum</th></tr></thead><tbody>';
-                
-                if(data.length === 0) {
-                    html = '<tr><td colspan="4" class="text-center">Bugün için kayıtlı randevu bulunamadı.</td></tr>';
-                } else {
-                    data.forEach(a => {
-                        html += `<tr><td>${a.baslangic}</td><td>${a.egitmen}</td><td>${a.hizmet}</td><td>${a.durum}</td></tr>`;
-                    });
-                }
-                html += '</tbody>';
+    function displayTable(title, htmlContent) {
+        Swal.close(); // Loading kapat
+        document.getElementById("reportSection").classList.remove("d-none");
+        document.getElementById("reportTitle").innerText = title;
+        document.getElementById("apiTable").innerHTML = htmlContent;
 
-                showTable(`Randevular (${today})`, html);
-            } catch (err) { alert("API Hatası!"); }
-        }
+        // Ekrana kaydır
+        document.getElementById("reportSection").scrollIntoView({ behavior: 'smooth' });
+    }
 
-        function showTable(title, content) {
-            document.getElementById("reportArea").classList.remove("d-none");
-            document.getElementById("reportTitle").innerText = title;
-            document.getElementById("apiTable").innerHTML = content;
-        }
-    </script>
+    function closeReport() {
+        document.getElementById("reportSection").classList.add("d-none");
+    }
+</script>
 }
