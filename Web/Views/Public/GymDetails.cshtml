@@ -1,0 +1,87 @@
+@model Web.Models.GymBranch
+
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<!-- HERO HEADER -->
+<div class="bg-dark text-white py-5 mb-5" style="background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=1920'); background-size: cover;">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold">@Model.Name</h1>
+        <p class="lead"><i class="bi bi-geo-alt"></i> @Model.City, @Model.Address</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <!-- SOL: HİZMETLER VE FİYATLAR -->
+        <div class="col-md-6 mb-4">
+            <h3 class="fw-bold mb-3 text-primary"><i class="bi bi-tags-fill"></i> Sunulan Hizmetler</h3>
+            <div class="card shadow-sm border-0">
+                <ul class="list-group list-group-flush">
+                    @if (Model.GymServices.Any(gs => gs.IsAvailable))
+                    {
+                        foreach (var gs in Model.GymServices.Where(gs => gs.IsAvailable))
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center py-3">
+                                <div>
+                                    <h6 class="mb-0 fw-bold">@gs.Service.Name</h6>
+                                    <small class="text-muted">@gs.Service.DurationMinutes dk</small>
+                                </div>
+                                <span class="badge bg-success rounded-pill fs-6">@gs.Price ₺</span>
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <li class="list-group-item text-center text-muted py-4">Bu şubede henüz hizmet tanımlanmamış.</li>
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <!-- SAĞ: BU SALONDAKİ EĞİTMENLER -->
+        <div class="col-md-6">
+            <h3 class="fw-bold mb-3 text-success"><i class="bi bi-people-fill"></i> Eğitmen Kadromuz</h3>
+            <div class="row g-3">
+                @if (Model.Trainers.Any())
+                {
+                    foreach (var trainer in Model.Trainers)
+                    {
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <div class="card-body text-center">
+                                    @if (!string.IsNullOrEmpty(trainer.ProfileImageUrl))
+                                    {
+                                        <img src="~/images/trainers/@trainer.ProfileImageUrl" class="rounded-circle mb-3 object-fit-cover" width="80" height="80">
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-light rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                            <i class="bi bi-person fs-1 text-secondary"></i>
+                                        </div>
+                                    }
+                                    <h6 class="card-title fw-bold">@trainer.User.FirstName @trainer.User.LastName</h6>
+                                    
+                                    <!-- Uzmanlıklar -->
+                                    <div class="mb-2">
+                                        @foreach(var spec in trainer.Specializations.Take(2))
+                                        {
+                                            <span class="badge bg-light text-dark border me-1">@spec.Specialization.Name</span>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="col-12">
+                        <div class="alert alert-light text-center border">Bu şubede kayıtlı eğitmen bulunmamaktadır.</div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,135 @@
+@model Web.Models.ViewModels.ProfileViewModel
+
+@{
+    ViewData["Title"] = "Profil Ayarları";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card shadow border-0">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center p-3">
+                    <h4 class="mb-0"><i class="bi bi-person-lines-fill me-2"></i> Profil Ayarları</h4>
+                    <span class="badge bg-light text-primary">Üye Hesabı</span>
+                </div>
+                
+                <div class="card-body p-4">
+                    <form asp-action="Index" enctype="multipart/form-data">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                        <div class="row">
+                            <!-- SOL TARAF: RESİM VE GÜVENLİK -->
+                            <div class="col-md-4 text-center border-end">
+                                <div class="mb-3">
+                                    @if (!string.IsNullOrEmpty(Model.ExistingProfilePicture))
+                                    {
+                                        <img src="~/images/members/@Model.ExistingProfilePicture" 
+                                             class="rounded-circle img-thumbnail shadow-sm object-fit-cover" 
+                                             style="width: 180px; height: 180px;" 
+                                             id="imgPreview">
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center shadow-sm mb-2" 
+                                             style="width: 180px; height: 180px; border: 5px solid #fff;">
+                                            <i class="bi bi-person-fill text-secondary" style="font-size: 5rem;"></i>
+                                        </div>
+                                    }
+                                </div>
+                                
+                                <label class="btn btn-outline-primary btn-sm w-100 mt-2 mb-4">
+                                    <i class="bi bi-camera-fill me-1"></i> Fotoğrafı Değiştir
+                                    <input asp-for="ProfilePicture" type="file" class="d-none" accept="image/*" onchange="previewImage(this)">
+                                </label>
+
+                                <!-- ŞİFRE DEĞİŞTİRME BUTONU -->
+                                <div class="border-top pt-3">
+                                    <h6 class="text-danger fw-bold"><i class="bi bi-shield-lock"></i> Güvenlik</h6>
+                                    <a asp-action="ChangePassword" class="btn btn-danger btn-sm w-100 mt-2">
+                                        Şifremi Değiştir
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- SAĞ TARAF: FORM BİLGİLERİ -->
+                            <div class="col-md-8 ps-md-4">
+                                <h5 class="text-muted mb-3 border-bottom pb-2">Kişisel Bilgiler</h5>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label asp-for="FirstName" class="form-label fw-bold"></label>
+                                        <input asp-for="FirstName" class="form-control" />
+                                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label asp-for="LastName" class="form-label fw-bold"></label>
+                                        <input asp-for="LastName" class="form-control" />
+                                        <span asp-validation-for="LastName" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Email" class="form-label fw-bold"></label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light"><i class="bi bi-envelope"></i></span>
+                                        <input asp-for="Email" class="form-control bg-light" readonly />
+                                    </div>
+                                    <small class="text-muted">Güvenlik nedeniyle e-posta adresi değiştirilemez.</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="PhoneNumber" class="form-label fw-bold"></label>
+                                    <input asp-for="PhoneNumber" class="form-control" placeholder="05XX XXX XX XX" />
+                                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                                </div>
+
+                                <h5 class="text-muted mb-3 border-bottom pb-2 mt-4">Ek Bilgiler</h5>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label asp-for="BirthDate" class="form-label fw-bold"></label>
+                                        <input asp-for="BirthDate" class="form-control" type="date" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label asp-for="EmergencyContact" class="form-label fw-bold"></label>
+                                        <input asp-for="EmergencyContact" class="form-control" placeholder="Yakını Adı - Tel" />
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-end gap-2 mt-4">
+                                    <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">İptal</a>
+                                    <button type="submit" class="btn btn-success px-4 shadow-sm">
+                                        <i class="bi bi-save me-1"></i> Değişiklikleri Kaydet
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                if (!input.files[0].type.match('image.*')) {
+                    Swal.fire('Hata', 'Lütfen geçerli bir resim dosyası seçiniz.', 'error');
+                    return;
+                }
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Resim Seçildi',
+                    text: 'Kaydet butonuna basınca güncellenecektir.',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    toast: true, position: 'top-end'
+                });
+            }
+        }
+    </script>
+}

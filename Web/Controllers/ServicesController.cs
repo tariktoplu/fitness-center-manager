@@ -82,4 +82,49 @@ public class ServicesController : Controller
         }
         return RedirectToAction(nameof(Index));
     }
+    
+    // --- EKSİK OLAN PARÇA: DÜZENLEME (UPDATE) ---
+
+    // 4. DÜZENLEME SAYFASI (GET)
+    [HttpGet]
+    public async Task<IActionResult> Edit(int? id)
+    {
+        if (id == null) return NotFound();
+
+        var service = await _context.Services.FindAsync(id);
+        if (service == null) return NotFound();
+
+        ViewData["CategoryId"] = new SelectList(_context.ServiceCategories, "Id", "Name", service.CategoryId);
+        return View(service);
+    }
+
+    // 4. DÜZENLEME İŞLEMİ (POST)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Edit(int id, Service service)
+    {
+        if (id != service.Id) return NotFound();
+
+        // Kategori ve GymServices validasyonunu yoksay
+        ModelState.Remove("Category");
+        ModelState.Remove("GymServices");
+
+        if (ModelState.IsValid)
+        {
+            try
+            {
+                _context.Update(service);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.Services.Any(e => e.Id == service.Id)) return NotFound();
+                else throw;
+            }
+            return RedirectToAction(nameof(Index));
+        }
+        
+        ViewData["CategoryId"] = new SelectList(_context.ServiceCategories, "Id", "Name", service.CategoryId);
+        return View(service);
+    }
 }
