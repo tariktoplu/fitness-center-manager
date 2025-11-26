@@ -1,58 +1,156 @@
 @model Web.Models.ViewModels.BranchHoursViewModel
 
 @{
-    ViewData["Title"] = "Çalışma Saatleri";
+ViewData["Title"] = "Çalışma Saatleri";
+
+    <!-- Flatpickr CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_blue.css">
 }
 
 <div class="container mt-4">
-    <div class="card shadow">
-        <div class="card-header bg-info text-white">
-            <h4 class="mb-0">@Model.BranchName - Çalışma Saatleri</h4>
+    <div class="card shadow border-0">
+        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="mb-0"><i class="bi bi-clock-history"></i> @Model.BranchName</h4>
+                <small>Haftalık Çalışma Saatleri Planlaması</small>
+            </div>
+            <a asp-action="Index" class="btn btn-light btn-sm text-info fw-bold">Listeye Dön</a>
         </div>
-        <div class="card-body">
+
+        <div class="card-body p-4">
             <form asp-action="ManageHours" method="post">
                 <input type="hidden" asp-for="GymBranchId" />
                 <input type="hidden" asp-for="BranchName" />
 
-                <table class="table table-bordered">
-                    <thead class="table-light text-center">
+                <div class="table-responsive">
+                    <table class="table table-bordered align-middle">
+                        <thead class="table-light text-center">
                         <tr>
-                            <th>Gün</th>
-                            <th>Kapalı mı?</th>
-                            <th>Açılış</th>
-                            <th>Kapanış</th>
+                            <th style="width: 150px;">Gün</th>
+                            <th style="width: 100px;">Durum</th>
+                            <th>Açılış Saati</th>
+                            <th>Kapanış Saati</th>
                         </tr>
-                    </thead>
-                    <tbody>
+                        </thead>
+                        <tbody>
                         @for (int i = 0; i < Model.Hours.Count; i++)
                         {
-                            <tr>
-                                <td class="fw-bold bg-light">
-                                    <input type="hidden" asp-for="Hours[i].DayOfWeek" />
-                                    <input type="hidden" asp-for="Hours[i].DayName" />
-                                    @Model.Hours[i].DayName
-                                </td>
-                                <td class="text-center">
-                                    <div class="form-check form-switch d-flex justify-content-center">
-                                        <input class="form-check-input" type="checkbox" asp-for="Hours[i].IsClosed">
-                                    </div>
-                                </td>
-                                <td>
-                                    <input type="time" asp-for="Hours[i].OpeningTime" class="form-control" />
-                                </td>
-                                <td>
-                                    <input type="time" asp-for="Hours[i].ClosingTime" class="form-control" />
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+                        string rowClass = Model.Hours[i].IsClosed ? "bg-light text-muted" : "";
 
-                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                        <tr class="@rowClass" id="row_@i">
+                            <td class="fw-bold text-center">
+                                <input type="hidden" asp-for="Hours[i].DayOfWeek" />
+                                <input type="hidden" asp-for="Hours[i].DayName" />
+
+                                @if(Model.Hours[i].DayName == "Pazar" || Model.Hours[i].DayName == "Cumartesi")
+                                {
+                                <span class="text-danger">@Model.Hours[i].DayName</span>
+                                }
+                                else
+                                {
+                                @Model.Hours[i].DayName
+                                }
+                            </td>
+                            <td class="text-center">
+                                <div class="form-check form-switch d-flex justify-content-center">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           asp-for="Hours[i].IsClosed"
+                                           id="check_@i"
+                                           onchange="toggleTimeInputs(@i)"
+                                           style="cursor: pointer; transform: scale(1.2);">
+                                    <label class="form-check-label ms-2 small" for="check_@i">Kapalı</label>
+                                </div>
+                            </td>
+                            <td>
+                                <!-- 
+                                    DEĞİŞİKLİK: type="text" yaptık ve 'time-picker' sınıfı ekledik.
+                                    Böylece tarayıcının AM/PM saati yerine Flatpickr devreye girecek.
+                                -->
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="bi bi-sun"></i></span>
+                                    <input type="text"
+                                           class="form-control text-center time-picker"
+                                           name="Hours[@i].OpeningTime"
+                                           value="@Model.Hours[i].OpeningTime.ToString(@"hh\:mm")"
+                                           id="open_@i"
+                                           @(Model.Hours[i].IsClosed ? "disabled" : "") />
+                                </div>
+                            </td>
+                            <td>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="bi bi-moon"></i></span>
+                                    <input type="text"
+                                           class="form-control text-center time-picker"
+                                           name="Hours[@i].ClosingTime"
+                                           value="@Model.Hours[i].ClosingTime.ToString(@"hh\:mm")"
+                                           id="close_@i"
+                                           @(Model.Hours[i].IsClosed ? "disabled" : "") />
+                                </div>
+                            </td>
+                        </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
                     <a asp-action="Index" class="btn btn-secondary me-2">İptal</a>
-                    <button type="submit" class="btn btn-info text-white px-5"><i class="bi bi-clock"></i> Saatleri Güncelle</button>
+                    <button type="submit" class="btn btn-info text-white px-5 shadow">
+                        <i class="bi bi-save"></i> Saatleri Güncelle
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+@section Scripts {
+<!-- Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/tr.js"></script>
+
+<script>
+    // 1. Flatpickr Kurulumu (Tüm saat inputları için tek seferde)
+    document.addEventListener('DOMContentLoaded', function() {
+        flatpickr(".time-picker", {
+            enableTime: true,           // Saat seçimi açık
+            noCalendar: true,           // Takvim kapalı
+            dateFormat: "H:i",          // 24 Saat formatı (Örn: 14:30)
+            time_24hr: true,            // AM/PM YOK!
+            minuteIncrement: 30,        // 30 dakikalık aralıklar (İstersen 15 yap)
+            locale: "tr",               // Türkçe
+            allowInput: true            // Elle yazmaya izin ver
+        });
+    });
+
+    // 2. Kapalı/Açık Toggle Fonksiyonu
+    function toggleTimeInputs(index) {
+        var checkbox = document.getElementById('check_' + index);
+        var openInput = document.getElementById('open_' + index);
+        var closeInput = document.getElementById('close_' + index);
+        var row = document.getElementById('row_' + index);
+
+        if (checkbox.checked) {
+            // Kapalıysa: Kilitle ve Gri yap
+            openInput.disabled = true;
+            closeInput.disabled = true;
+            row.classList.add('bg-light', 'text-muted');
+
+            // Değerleri temizle (Görsel olarak)
+            openInput.value = "";
+            closeInput.value = "";
+        } else {
+            // Açıksa: Kilidi aç ve Normale dön
+            openInput.disabled = false;
+            closeInput.disabled = false;
+            row.classList.remove('bg-light', 'text-muted');
+
+            // Varsayılan saatleri doldur
+            if(!openInput.value) openInput.value = "09:00";
+            if(!closeInput.value) closeInput.value = "22:00";
+        }
+    }
+</script>
+}
