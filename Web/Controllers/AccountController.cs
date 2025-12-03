@@ -5,17 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Web.Controllers;
 
-public class AccountController : Controller
+public class AccountController(SignInManager<AppUser> signInManager, UserManager<AppUser> userManager)
+    : Controller
 {
-    private readonly SignInManager<AppUser> _signInManager;
-    private readonly UserManager<AppUser> _userManager;
-
-    public AccountController(SignInManager<AppUser> signInManager, UserManager<AppUser> userManager)
-    {
-        _signInManager = signInManager;
-        _userManager = userManager;
-    }
-
     // GET: /Account/Login
     [HttpGet]
     public IActionResult Login()
@@ -38,13 +30,13 @@ public class AccountController : Controller
         }
 
         // Kullanıcıyı email ile bul
-        var user = await _userManager.FindByEmailAsync(model.Email);
+        var user = await userManager.FindByEmailAsync(model.Email);
         
         if (user != null)
         {
             // Şifre kontrolü ve giriş yapma işlemi
             // "false" -> lockoutOnFailure (şifreyi çok yanlış girince hesabı kilitleme) kapalı
-            var result = await _signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, false);
+            var result = await signInManager.PasswordSignInAsync(user, model.Password, model.RememberMe, false);
 
             if (result.Succeeded)
             {
@@ -86,12 +78,12 @@ public class AccountController : Controller
             IsActive = true
         };
 
-        var result = await _userManager.CreateAsync(user, model.Password);
+        var result = await userManager.CreateAsync(user, model.Password);
 
         if (result.Succeeded)
         {
             // Kullanıcıya otomatik olarak "Member" (Üye) rolü ver
-            await _userManager.AddToRoleAsync(user, "Member");
+            await userManager.AddToRoleAsync(user, "Member");
             
             // Member tablosuna da boş bir kayıt aç (İlişki için)
             var memberProfile = new Member { UserId = user.Id };
@@ -99,7 +91,7 @@ public class AccountController : Controller
             // Ancak şimdilik sadece User tablosu yeterli, Member profili detayları sonra doldurulabilir.
 
             // Kayıt olduktan sonra otomatik giriş yap
-            await _signInManager.SignInAsync(user, isPersistent: false);
+            await signInManager.SignInAsync(user, isPersistent: false);
             
             return RedirectToAction("Index", "Home");
         }
@@ -116,7 +108,7 @@ public class AccountController : Controller
     // Çıkış Yapma (Logout)
     public async Task<IActionResult> Logout()
     {
-        await _signInManager.SignOutAsync();
+        await signInManager.SignOutAsync();
         return RedirectToAction("Index", "Home");
     }
     
